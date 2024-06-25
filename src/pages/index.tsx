@@ -1,5 +1,7 @@
 import Head from 'next/head'
 import styles from '../../styles/home.module.css'
+import Image from 'next/image'
+import heroImg from "../../public/assets/hero.png"
 
 const Home = () => {
   return (
@@ -10,7 +12,22 @@ const Home = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1>Meu projeto</h1>
+     <main className={`${styles.main} main`}>
+        <div className={`${styles.logoContent} logoContent`}>
+          <Image 
+            className={`${styles.hero} hero`}
+            alt='Logo Tarefa+'
+            src={heroImg}
+            priority
+          />
+
+          <h1 className={`${styles.title} title`}>
+            Sistema feito para você organizar <br />
+            seus estudos e tarefas
+          </h1>
+
+        </div>
+     </main>
     </div>
   )
 }
