@@ -45,6 +45,7 @@
   background-color: var(--button-color);
   padding: 12px 0;
   font-size: 1.125rem;
+  cursor: pointer;
 }
 
 .taskContainer {
