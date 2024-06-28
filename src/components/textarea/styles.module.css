@@ -1,0 +1,8 @@
+.textarea {
+  width: 100%;
+  resize: nome;
+  height: 160px;
+  border-radius: 8px;
+  outline: none;
+  padding: 8px;
+}
