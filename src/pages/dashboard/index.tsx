@@ -1,13 +1,13 @@
+// Dashboard.tsx ou Dashboard.jsx
+import { toast } from "react-toastify";
 import { GetServerSideProps } from "next";
 import { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import styles from "./styles.module.css";
 import Head from "next/head";
-
 import { getSession } from "next-auth/react";
 import Textarea from "../../components/textarea";
 import { FiShare2 } from "react-icons/fi";
 import { FaTrash, FaEdit } from "react-icons/fa";
-
 import { db } from "../../services/firebaseConection";
 import {
   addDoc,
@@ -78,7 +78,10 @@ const Dashboard = ({ user }: IHomeProps) => {
   async function handlerRegisterTask(event: FormEvent) {
     event.preventDefault();
 
-    if (input === "") return;
+    if (input === "") {
+      toast.error("O campo de tarefa está vazio!");
+      return;
+    }
 
     try {
       if (isEditing && currentTaskId) {
@@ -87,6 +90,7 @@ const Dashboard = ({ user }: IHomeProps) => {
           task: input,
           public: publicTask,
         });
+        toast.success("Tarefa atualizada com sucesso!");
         setIsEditing(false);
         setCurrentTaskId(null);
       } else {
@@ -96,11 +100,13 @@ const Dashboard = ({ user }: IHomeProps) => {
           user: user?.email,
           public: publicTask,
         });
+        toast.success("Tarefa registrada com sucesso!");
       }
 
       setInput("");
       setPublicTask(false);
     } catch (err) {
+      toast.error("Erro ao registrar a tarefa.");
       console.log(err);
     }
   }
@@ -109,15 +115,13 @@ const Dashboard = ({ user }: IHomeProps) => {
     await navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_URL}/task/${id}`
     );
-    // TODO: Usar o Toastify
-    alert("URL Copiada com sucesso!");
+    toast.info("URL copiada com sucesso!");
   };
 
   const handlerDeleteTask = async (id: string) => {
     const docRef = doc(db, "tasks", id);
     await deleteDoc(docRef);
-    // TODO: Usar o Toastify
-    console.log("Tarefa removida");
+    toast.success("Tarefa removida com sucesso!");
   };
 
   const handlerEditTask = (task: ITasksProps) => {
@@ -128,10 +132,10 @@ const Dashboard = ({ user }: IHomeProps) => {
   };
 
   const handlerCancelEdit = () => {
-    setIsEditing(false);
-    setCurrentTaskId(null);
     setInput("");
     setPublicTask(false);
+    setIsEditing(false);
+    setCurrentTaskId(null);
   };
 
   return (
@@ -173,13 +177,14 @@ const Dashboard = ({ user }: IHomeProps) => {
               >
                 {isEditing ? "Atualizar Tarefa" : "Registrar"}
               </button>
+
               {isEditing && (
                 <button
                   type="button"
                   className={`${styles.buttonCancel} buttonCancel`}
                   onClick={handlerCancelEdit}
                 >
-                  Cancelar Edição
+                  Cancelar
                 </button>
               )}
             </form>
