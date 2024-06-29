@@ -5,10 +5,10 @@
   --secondary-color: #F1F1F1;
   --highlight-color: #EA3410;
   --button-color: #3183FF;
+  --border-radius: 4px
   --text-color-primary: #FFF;
   --bg-color: #FAFAFA;
   --font-family: "Robot", sans-serif;
-  --border-radius: 4px;
 }
 
 * {
