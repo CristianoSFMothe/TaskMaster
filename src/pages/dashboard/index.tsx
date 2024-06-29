@@ -16,7 +16,10 @@ import {
   orderBy,
   where,
   onSnapshot,
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
+import Link from "next/link";
 
 interface IHomeProps {
   user: {
@@ -89,6 +92,21 @@ const Dashboard = ({ user }: IHomeProps) => {
     }
   }
 
+  const handlerShare = async (id: string) => {
+    await navigator.clipboard.writeText(
+      `${process.env.NEXT_PUPLIC_URL}/task/${id}`
+    );
+    // TODO: Usar o Toastify
+    alert("URL Copiada com sucesso!");
+  };
+
+  const handlerDeleteTask = async (id: string) => {
+    const docRef = doc(db, "tasks", id);
+    await deleteDoc(docRef);
+    // TODO: Usar o Toastify
+    console.log("Tarefa removida")
+  };
+
   return (
     <div className={`${styles.container} container`}>
       <Head>
@@ -141,15 +159,28 @@ const Dashboard = ({ user }: IHomeProps) => {
                 <div className={`${styles.tagContainer} tagContainer`}>
                   <label className={`${styles.tag} tag`}>PÚBLICO</label>
 
-                  <button className={`${styles.shareButton} shareButton`}>
+                  <button
+                    className={`${styles.shareButton} shareButton`}
+                    onClick={() => handlerShare(item.id)}
+                  >
                     <FiShare2 size={12} color="#3183FF" />
                   </button>
                 </div>
               )}
 
               <div className={`${styles.taskContent} taskContent`}>
-                <p>{item.task}</p>
-                <button className={`${styles.trashButton} trashButton`}>
+                {item.public ? (
+                  <Link href={`/task/${item.id}`}>
+                    <p>{item.task}</p>
+                  </Link>
+                ) : (
+                  <p>{item.task}</p>
+                )}
+
+                <button
+                  className={`${styles.trashButton} trashButton`}
+                  onClick={() => handlerDeleteTask(item.id)}
+                >
                   <FaTrash size={24} color="#EA3140" />
                 </button>
               </div>
