@@ -1,3 +1,4 @@
+/* styles/Dashboard.module.css */
 .container {
   width: 100%;
 }
@@ -25,7 +26,7 @@
 
 .checkboxArea label {
   margin-left: 8px;
-  color: var(--text-color-primary);
+  color: var(--text-color-primary)
 }
 
 .checkboxArea {
@@ -37,24 +38,27 @@
   height: 18px;
 }
 
-.buttonSubmit,
+.buttonSubmit {
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  color: var(--text-color-primary);
+  background-color: var(--button-color);
+  padding: 12px 0;
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
 .buttonCancel {
   width: 100%;
   border: 0;
   border-radius: 4px;
   color: var(--text-color-primary);
+  background-color: var(--button-color);
   padding: 12px 0;
   font-size: 1.125rem;
   cursor: pointer;
-  margin-top: 10px; /* Add margin between buttons */
-}
-
-.buttonSubmit {
-  background-color: var(--button-color);
-}
-
-.buttonCancel {
-  background-color: var(--cancel-button-color); /* Define a color for cancel button */
+  margin-top: 10px;
 }
 
 .taskContainer {
@@ -100,7 +104,7 @@
   padding: 2px 6px;
   color: var(--text-color-primary);
   border-radius: 4px;
-  font-size: 0.75rem;
+  font: 0.75rem;
 }
 
 .shareButton {
@@ -115,39 +119,31 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  user-select: none;
+  user-select: none; /* Para impedir a seleção de texto */
 }
 
 .taskContent p {
   white-space: pre-wrap;
-  margin-right: 10px;
+  margin-right: 20px; /* Para adicionar espaço antes da barra vertical */
 }
 
-.taskActions {
+.taskContent .actions {
   display: flex;
   align-items: center;
 }
 
-.taskActions::before {
-  content: '';
-  display: block;
+.taskContent .actions button {
+  background: transparent;
+  border: 0;
+  margin: 0 8px;
+  cursor: pointer;
+}
+
+.taskContent .actions::before {
+  content: "";
   width: 1px;
   height: auto;
   background-color: #909090;
-  margin-right: 10px;
-  align-self: stretch; /* Ensures the line takes up the full height of its parent */
-}
-
-.editButton {
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  margin: 0 8px;
-}
-
-.trashButton {
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  margin: 0 8px;
+  margin-right: 8px;
+  align-self: stretch; /* Para garantir que a barra vertical tenha a altura do conteúdo */
 }

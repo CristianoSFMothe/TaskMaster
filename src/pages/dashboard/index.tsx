@@ -21,6 +21,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import Link from "next/link";
+import Modal from "../../components/modal";
 
 interface IHomeProps {
   user: {
@@ -42,6 +43,8 @@ const Dashboard = ({ user }: IHomeProps) => {
   const [tasks, setTasks] = useState<ITasksProps[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -118,10 +121,14 @@ const Dashboard = ({ user }: IHomeProps) => {
     toast.info("URL copiada com sucesso!");
   };
 
-  const handlerDeleteTask = async (id: string) => {
-    const docRef = doc(db, "tasks", id);
-    await deleteDoc(docRef);
-    toast.success("Tarefa removida com sucesso!");
+  const handlerDeleteTask = async () => {
+    if (taskToDelete) {
+      const docRef = doc(db, "tasks", taskToDelete);
+      await deleteDoc(docRef);
+      toast.success("Tarefa removida com sucesso!");
+      setIsModalOpen(false);
+      setTaskToDelete(null);
+    }
   };
 
   const handlerEditTask = (task: ITasksProps) => {
@@ -136,6 +143,11 @@ const Dashboard = ({ user }: IHomeProps) => {
     setPublicTask(false);
     setIsEditing(false);
     setCurrentTaskId(null);
+  };
+
+  const confirmDeleteTask = (id: string) => {
+    setTaskToDelete(id);
+    setIsModalOpen(true);
   };
 
   return (
@@ -175,9 +187,8 @@ const Dashboard = ({ user }: IHomeProps) => {
                 type="submit"
                 className={`${styles.buttonSubmit} buttonSubmit`}
               >
-                {isEditing ? "Atualizar Tarefa" : "Registrar"}
+                {isEditing ? "Atualizar" : "Registrar"}
               </button>
-
               {isEditing && (
                 <button
                   type="button"
@@ -218,18 +229,12 @@ const Dashboard = ({ user }: IHomeProps) => {
                   <p>{item.task}</p>
                 )}
 
-                <div className={`${styles.taskActions} taskActions`}>
-                  <button
-                    className={`${styles.editButton} editButton`}
-                    onClick={() => handlerEditTask(item)}
-                  >
-                    <FaEdit size={24} color="#007bff" />
+                <div className={styles.actions}>
+                  <button onClick={() => handlerEditTask(item)}>
+                    <FaEdit size={24} color="#3183FF" />
                   </button>
-                  <button
-                    className={`${styles.trashButton} trashButton`}
-                    onClick={() => handlerDeleteTask(item.id)}
-                  >
-                    <FaTrash size={24} color="#EA3140" />
+                  <button onClick={() => confirmDeleteTask(item.id)}>
+                    <FaTrash size={24} color="#FF3636" />
                   </button>
                 </div>
               </div>
@@ -237,6 +242,15 @@ const Dashboard = ({ user }: IHomeProps) => {
           ))}
         </section>
       </main>
+
+      <Modal
+        isOpen={isModalOpen}
+        title="Confirmar remoção"
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handlerDeleteTask}
+      >
+        <p>Tem certeza que deseja remover esta tarefa?</p>
+      </Modal>
     </div>
   );
 };
