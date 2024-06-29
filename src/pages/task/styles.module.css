@@ -58,3 +58,32 @@
   cursor: not-allowed;
   background-color: rgba(49, 131, 255, 0.600);
 }
+
+.comment {
+  border: 1px solid #DDD;
+  border-radius: var(--border-radius);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.comment p {
+  white-space: pre-wrap;
+  margin-top: 14px;
+}
+
+.headComment {
+  display: flex;
+  align-items: center;
+}
+
+.commentsLabel {
+  background-color: #CCC;
+  padding: 4px 8px;
+  margin-right: 8px;
+  border-radius: var(--border-radius);
+}
+
+.buttonTrash {
+  border: 0;
+  background: transparent;
+}
