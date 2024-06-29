@@ -25,7 +25,7 @@
 
 .checkboxArea label {
   margin-left: 8px;
-  color: var(--text-color-primary)
+  color: var(--text-color-primary);
 }
 
 .checkboxArea {
@@ -37,15 +37,24 @@
   height: 18px;
 }
 
-.buttonSubmit {
+.buttonSubmit,
+.buttonCancel {
   width: 100%;
   border: 0;
   border-radius: 4px;
   color: var(--text-color-primary);
-  background-color: var(--button-color);
   padding: 12px 0;
   font-size: 1.125rem;
   cursor: pointer;
+  margin-top: 10px; /* Add margin between buttons */
+}
+
+.buttonSubmit {
+  background-color: var(--button-color);
+}
+
+.buttonCancel {
+  background-color: var(--cancel-button-color); /* Define a color for cancel button */
 }
 
 .taskContainer {
@@ -91,7 +100,7 @@
   padding: 2px 6px;
   color: var(--text-color-primary);
   border-radius: 4px;
-  font: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .shareButton {
@@ -104,12 +113,35 @@
 .taskContent {
   display: flex;
   align-items: center;
-  justify-content:space-between;
+  justify-content: space-between;
   width: 100%;
 }
 
 .taskContent p {
   white-space: pre-wrap;
+  margin-right: 10px;
+}
+
+.taskActions {
+  display: flex;
+  align-items: center;
+}
+
+.taskActions::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: auto;
+  background-color: #909090;
+  margin-right: 10px;
+  align-self: stretch; /* Ensures the line takes up the full height of its parent */
+}
+
+.editButton {
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  margin: 0 8px;
 }
 
 .trashButton {

@@ -6,7 +6,7 @@ import Head from "next/head";
 import { getSession } from "next-auth/react";
 import Textarea from "../../components/textarea";
 import { FiShare2 } from "react-icons/fi";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 
 import { db } from "../../services/firebaseConection";
 import {
@@ -18,6 +18,7 @@ import {
   onSnapshot,
   doc,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import Link from "next/link";
 
@@ -39,6 +40,8 @@ const Dashboard = ({ user }: IHomeProps) => {
   const [input, setInput] = useState("");
   const [publicTask, setPublicTask] = useState(false);
   const [tasks, setTasks] = useState<ITasksProps[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -78,12 +81,22 @@ const Dashboard = ({ user }: IHomeProps) => {
     if (input === "") return;
 
     try {
-      await addDoc(collection(db, "tasks"), {
-        task: input,
-        created: new Date(),
-        user: user?.email,
-        public: publicTask,
-      });
+      if (isEditing && currentTaskId) {
+        const docRef = doc(db, "tasks", currentTaskId);
+        await updateDoc(docRef, {
+          task: input,
+          public: publicTask,
+        });
+        setIsEditing(false);
+        setCurrentTaskId(null);
+      } else {
+        await addDoc(collection(db, "tasks"), {
+          task: input,
+          created: new Date(),
+          user: user?.email,
+          public: publicTask,
+        });
+      }
 
       setInput("");
       setPublicTask(false);
@@ -94,7 +107,7 @@ const Dashboard = ({ user }: IHomeProps) => {
 
   const handlerShare = async (id: string) => {
     await navigator.clipboard.writeText(
-      `${process.env.NEXT_PUPLIC_URL}/task/${id}`
+      `${process.env.NEXT_PUBLIC_URL}/task/${id}`
     );
     // TODO: Usar o Toastify
     alert("URL Copiada com sucesso!");
@@ -104,7 +117,21 @@ const Dashboard = ({ user }: IHomeProps) => {
     const docRef = doc(db, "tasks", id);
     await deleteDoc(docRef);
     // TODO: Usar o Toastify
-    console.log("Tarefa removida")
+    console.log("Tarefa removida");
+  };
+
+  const handlerEditTask = (task: ITasksProps) => {
+    setInput(task.task);
+    setPublicTask(task.public);
+    setIsEditing(true);
+    setCurrentTaskId(task.id);
+  };
+
+  const handlerCancelEdit = () => {
+    setIsEditing(false);
+    setCurrentTaskId(null);
+    setInput("");
+    setPublicTask(false);
   };
 
   return (
@@ -144,8 +171,17 @@ const Dashboard = ({ user }: IHomeProps) => {
                 type="submit"
                 className={`${styles.buttonSubmit} buttonSubmit`}
               >
-                Registrar
+                {isEditing ? "Atualizar Tarefa" : "Registrar"}
               </button>
+              {isEditing && (
+                <button
+                  type="button"
+                  className={`${styles.buttonCancel} buttonCancel`}
+                  onClick={handlerCancelEdit}
+                >
+                  Cancelar Edição
+                </button>
+              )}
             </form>
           </div>
         </section>
@@ -177,12 +213,20 @@ const Dashboard = ({ user }: IHomeProps) => {
                   <p>{item.task}</p>
                 )}
 
-                <button
-                  className={`${styles.trashButton} trashButton`}
-                  onClick={() => handlerDeleteTask(item.id)}
-                >
-                  <FaTrash size={24} color="#EA3140" />
-                </button>
+                <div className={`${styles.taskActions} taskActions`}>
+                  <button
+                    className={`${styles.editButton} editButton`}
+                    onClick={() => handlerEditTask(item)}
+                  >
+                    <FaEdit size={24} color="#007bff" />
+                  </button>
+                  <button
+                    className={`${styles.trashButton} trashButton`}
+                    onClick={() => handlerDeleteTask(item.id)}
+                  >
+                    <FaTrash size={24} color="#EA3140" />
+                  </button>
+                </div>
               </div>
             </article>
           ))}
