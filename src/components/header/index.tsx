@@ -11,7 +11,7 @@ const Header = () => {
         <nav className={`${styles.nav} nav`}>
           <Link href="/">
             <h1 className={`${styles.logo} logo`}>
-              Tarefas<span>+</span>
+            TaskMaster<span>+</span>
             </h1>
           </Link>
 

@@ -8,14 +8,14 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Tarefas+ | Organize suas tarefas de forma fácil</title>
+        <title>TaskMaster+ | Organize suas tarefas de forma fácil</title>
       </Head>
 
       <main className={`${styles.main} main`}>
         <div className={`${styles.logoContent}`}>
           <Image
             className={`${styles.hero} hero`}
-            alt="Logo Tarefas+"
+            alt="Logo TaskMaster+"
             src={heroImg}
             priority
           />
