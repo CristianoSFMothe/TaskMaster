@@ -5,7 +5,7 @@ import Head from "next/head";
 import { getSession } from "next-auth/react";
 import Textarea from "../../components/textarea";
 import { FiShare2 } from "react-icons/fi";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit, FaCheck } from "react-icons/fa";
 import { db } from "../../services/firebaseConection";
 import {
   addDoc,
@@ -36,6 +36,7 @@ interface ITasksProps {
   public: boolean;
   task: string;
   user: string;
+  completed: boolean;
 }
 
 const Dashboard = ({ user }: IHomeProps) => {
@@ -66,6 +67,7 @@ const Dashboard = ({ user }: IHomeProps) => {
             create: doc.data().created,
             public: doc.data().public,
             user: doc.data().user,
+            completed: doc.data().completed || false,
           });
         });
 
@@ -171,6 +173,32 @@ const Dashboard = ({ user }: IHomeProps) => {
     setTaskToDelete(null);
   };
 
+  const handleCompleteTask = async (id: string) => {
+    const docRef = doc(db, "tasks", id);
+    try {
+      await updateDoc(docRef, {
+        completed: true,
+      });
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === id ? { ...task, completed: true } : task
+        )
+      );
+
+      CustomToast({
+        message: "Tarefa marcada como concluída!",
+        type: "success",
+      });
+    } catch (err) {
+      CustomToast({
+        message: "Erro ao marcar a tarefa como concluída.",
+        type: "error",
+      });
+      console.log(err);
+    }
+  };
+
   return (
     <div className={`${styles.container} container`}>
       <Head>
@@ -235,12 +263,16 @@ const Dashboard = ({ user }: IHomeProps) => {
               )}
 
               <div className={`${styles.taskContent} taskContent`}>
-                {item.public ? (
+                {item.public && !item.completed ? (
                   <Link href={`/task/${item.id}`}>
-                    <p>{item.task}</p>
+                    <p className={item.completed ? styles.completedTask : ""}>
+                      {item.task}
+                    </p>
                   </Link>
                 ) : (
-                  <p>{item.task}</p>
+                  <p className={item.completed ? styles.completedTask : ""}>
+                    {item.task}
+                  </p>
                 )}
 
                 <div className={styles.actions}>
@@ -249,6 +281,9 @@ const Dashboard = ({ user }: IHomeProps) => {
                   </button>
                   <button onClick={() => confirmDeleteTask(item.id)}>
                     <FaTrash size={24} color="#FF3636" />
+                  </button>
+                  <button onClick={() => handleCompleteTask(item.id)}>
+                    <FaCheck size={24} color="#34A853" />
                   </button>
                 </div>
               </div>

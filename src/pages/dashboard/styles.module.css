@@ -153,5 +153,14 @@
   height: auto;
   background-color: #909090;
   margin-right: 8px;
-  align-self: stretch; /* Para garantir que a barra vertical tenha a altura do conteúdo */
+  align-self: stretch; 
+}
+
+.completedTask {
+  text-decoration: line-through;
+  color: gray; 
+}
+
+.taskContent p.completedTask {
+  cursor: not-allowed;
 }
