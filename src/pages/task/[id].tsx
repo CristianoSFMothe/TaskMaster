@@ -13,6 +13,7 @@ import {
   getDoc,
   addDoc,
   getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 
 import Textarea from "../../components/textarea/index";
@@ -67,9 +68,9 @@ export default function Task({ item, allComments }: ITaskProps) {
         taskId: item?.taskId,
         user: session?.user.email,
         name: session?.user.name,
-      }
+      };
 
-      setComments((oldItems) => [...oldItems, data])
+      setComments((oldItems) => [...oldItems, data]);
 
       setInput("");
     } catch (err) {
@@ -77,6 +78,21 @@ export default function Task({ item, allComments }: ITaskProps) {
     }
     // TODO: Usar o Toastify
     alert("TESTE");
+  };
+
+  const handleDeleteComments = async (id: string) => {
+    try {
+      const docRef = doc(db, "comments", id);
+
+      await deleteDoc(docRef);
+
+      const deleteComment = comments.filter((item) => item.id !== id)
+
+      setComments(deleteComment)
+      
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -115,7 +131,7 @@ export default function Task({ item, allComments }: ITaskProps) {
       </section>
 
       <section className={`${styles.commentsContainer} commentsContainer`}>
-        <h2>Tocos os comentários</h2>
+        <h2>Todos os comentários</h2>
         {comments.length === 0 && (
           <span>Nenhum comentário foi encontrado...</span>
         )}
@@ -128,11 +144,13 @@ export default function Task({ item, allComments }: ITaskProps) {
               </label>
 
               {item.user === session?.user?.email && (
-                <button className={`${styles.buttonTrash} buttonTrash`}>
+                <button
+                  className={`${styles.buttonTrash} buttonTrash`}
+                  onClick={() => handleDeleteComments(item.id)}
+                >
                   <FaTrash size={18} color="#EA3140" />
                 </button>
               )}
-
             </div>
             <p>{item.comments}</p>
           </article>
