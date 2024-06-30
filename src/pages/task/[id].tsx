@@ -18,6 +18,9 @@ import {
 
 import Textarea from "../../components/textarea/index";
 import { FaTrash } from "react-icons/fa";
+import { ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { CustomToast } from '../../components/toast/customToast';
 
 interface ITaskProps {
   item: {
@@ -47,7 +50,7 @@ export default function Task({ item, allComments }: ITaskProps) {
     event.preventDefault();
 
     if (input === "") {
-      alert("INFORME O COMENTÁRIO");
+      CustomToast({ message: "Informe o comentário", type: "warning" });
       return;
     }
 
@@ -73,11 +76,11 @@ export default function Task({ item, allComments }: ITaskProps) {
       setComments((oldItems) => [...oldItems, data]);
 
       setInput("");
+      CustomToast({ message: "Comentário adicionado com sucesso!", type: "success" });
     } catch (err) {
+      CustomToast({ message: "Erro ao adicionar comentário", type: "error" });
       console.log(err);
     }
-    // TODO: Usar o Toastify
-    alert("TESTE");
   };
 
   const handleDeleteComments = async (id: string) => {
@@ -86,11 +89,12 @@ export default function Task({ item, allComments }: ITaskProps) {
 
       await deleteDoc(docRef);
 
-      const deleteComment = comments.filter((item) => item.id !== id)
+      const deleteComment = comments.filter((item) => item.id !== id);
 
-      setComments(deleteComment)
-      
+      setComments(deleteComment);
+      CustomToast({ message: "Comentário removido com sucesso!", type: "error" });
     } catch (err) {
+      CustomToast({ message: "Erro ao remover comentário", type: "error" });
       console.log(err);
     }
   };
@@ -156,6 +160,7 @@ export default function Task({ item, allComments }: ITaskProps) {
           </article>
         ))}
       </section>
+      <ToastContainer transition={Slide} />
     </div>
   );
 }
