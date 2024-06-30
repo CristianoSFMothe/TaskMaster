@@ -1,5 +1,3 @@
-// Dashboard.tsx ou Dashboard.jsx
-import { toast } from "react-toastify";
 import { GetServerSideProps } from "next";
 import { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import styles from "./styles.module.css";
@@ -7,7 +5,7 @@ import Head from "next/head";
 import { getSession } from "next-auth/react";
 import Textarea from "../../components/textarea";
 import { FiShare2 } from "react-icons/fi";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit, FaCheck } from "react-icons/fa";
 import { db } from "../../services/firebaseConection";
 import {
   addDoc,
@@ -21,6 +19,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import Link from "next/link";
+import Modal from "../../components/modal";
+import { CustomToast } from "../../components/toast/customToast";
+import { ToastContainer, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface IHomeProps {
   user: {
@@ -34,6 +36,7 @@ interface ITasksProps {
   public: boolean;
   task: string;
   user: string;
+  completed: boolean;
 }
 
 const Dashboard = ({ user }: IHomeProps) => {
@@ -42,6 +45,8 @@ const Dashboard = ({ user }: IHomeProps) => {
   const [tasks, setTasks] = useState<ITasksProps[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -62,6 +67,7 @@ const Dashboard = ({ user }: IHomeProps) => {
             create: doc.data().created,
             public: doc.data().public,
             user: doc.data().user,
+            completed: doc.data().completed || false,
           });
         });
 
@@ -75,11 +81,14 @@ const Dashboard = ({ user }: IHomeProps) => {
     setPublicTask(event.target.checked);
   };
 
-  async function handlerRegisterTask(event: FormEvent) {
+  async function handleRegisterTask(event: FormEvent) {
     event.preventDefault();
 
     if (input === "") {
-      toast.error("O campo de tarefa está vazio!");
+      CustomToast({
+        message: "O campo de tarefa está vazio!",
+        type: "error",
+      });
       return;
     }
 
@@ -90,7 +99,10 @@ const Dashboard = ({ user }: IHomeProps) => {
           task: input,
           public: publicTask,
         });
-        toast.success("Tarefa atualizada com sucesso!");
+        CustomToast({
+          message: "Tarefa atualizada com sucesso!",
+          type: "success",
+        });
         setIsEditing(false);
         setCurrentTaskId(null);
       } else {
@@ -100,28 +112,41 @@ const Dashboard = ({ user }: IHomeProps) => {
           user: user?.email,
           public: publicTask,
         });
-        toast.success("Tarefa registrada com sucesso!");
+        CustomToast({
+          message: "Tarefa registrada com sucesso!",
+          type: "success",
+        });
       }
 
       setInput("");
       setPublicTask(false);
     } catch (err) {
-      toast.error("Erro ao registrar a tarefa.");
+      CustomToast({
+        message: "Erro ao registrar a tarefa.",
+        type: "error",
+      });
       console.log(err);
     }
   }
 
-  const handlerShare = async (id: string) => {
+  const handleShare = async (id: string) => {
     await navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_URL}/task/${id}`
     );
-    toast.info("URL copiada com sucesso!");
+    CustomToast({ message: "URL copiada com sucesso!", type: "info" });
   };
 
-  const handlerDeleteTask = async (id: string) => {
-    const docRef = doc(db, "tasks", id);
-    await deleteDoc(docRef);
-    toast.success("Tarefa removida com sucesso!");
+  const handleDeleteTask = async () => {
+    if (taskToDelete) {
+      const docRef = doc(db, "tasks", taskToDelete);
+      await deleteDoc(docRef);
+      CustomToast({
+        message: "Tarefa removida com sucesso!",
+        type: "error",
+      });
+      setIsModalOpen(false);
+      setTaskToDelete(null);
+    }
   };
 
   const handlerEditTask = (task: ITasksProps) => {
@@ -138,6 +163,42 @@ const Dashboard = ({ user }: IHomeProps) => {
     setCurrentTaskId(null);
   };
 
+  const confirmDeleteTask = (id: string) => {
+    setTaskToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTaskToDelete(null);
+  };
+
+  const handleCompleteTask = async (id: string) => {
+    const docRef = doc(db, "tasks", id);
+    try {
+      await updateDoc(docRef, {
+        completed: true,
+      });
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === id ? { ...task, completed: true } : task
+        )
+      );
+
+      CustomToast({
+        message: "Tarefa marcada como concluída!",
+        type: "success",
+      });
+    } catch (err) {
+      CustomToast({
+        message: "Erro ao marcar a tarefa como concluída.",
+        type: "error",
+      });
+      console.log(err);
+    }
+  };
+
   return (
     <div className={`${styles.container} container`}>
       <Head>
@@ -151,7 +212,7 @@ const Dashboard = ({ user }: IHomeProps) => {
 
             <form
               className={`${styles.form} form`}
-              onSubmit={handlerRegisterTask}
+              onSubmit={handleRegisterTask}
             >
               <Textarea
                 placeholder="Digite qual a sua tarefa..."
@@ -175,9 +236,8 @@ const Dashboard = ({ user }: IHomeProps) => {
                 type="submit"
                 className={`${styles.buttonSubmit} buttonSubmit`}
               >
-                {isEditing ? "Atualizar Tarefa" : "Registrar"}
+                {isEditing ? "Atualizar" : "Registrar"}
               </button>
-
               {isEditing && (
                 <button
                   type="button"
@@ -199,37 +259,31 @@ const Dashboard = ({ user }: IHomeProps) => {
               {item.public && (
                 <div className={`${styles.tagContainer} tagContainer`}>
                   <label className={`${styles.tag} tag`}>PÚBLICO</label>
-
-                  <button
-                    className={`${styles.shareButton} shareButton`}
-                    onClick={() => handlerShare(item.id)}
-                  >
-                    <FiShare2 size={12} color="#3183FF" />
-                  </button>
                 </div>
               )}
 
               <div className={`${styles.taskContent} taskContent`}>
-                {item.public ? (
+                {item.public && !item.completed ? (
                   <Link href={`/task/${item.id}`}>
-                    <p>{item.task}</p>
+                    <p className={item.completed ? styles.completedTask : ""}>
+                      {item.task}
+                    </p>
                   </Link>
                 ) : (
-                  <p>{item.task}</p>
+                  <p className={item.completed ? styles.completedTask : ""}>
+                    {item.task}
+                  </p>
                 )}
 
-                <div className={`${styles.taskActions} taskActions`}>
-                  <button
-                    className={`${styles.editButton} editButton`}
-                    onClick={() => handlerEditTask(item)}
-                  >
-                    <FaEdit size={24} color="#007bff" />
+                <div className={styles.actions}>
+                  <button onClick={() => handlerEditTask(item)}>
+                    <FaEdit size={24} color="#3183FF" />
                   </button>
-                  <button
-                    className={`${styles.trashButton} trashButton`}
-                    onClick={() => handlerDeleteTask(item.id)}
-                  >
-                    <FaTrash size={24} color="#EA3140" />
+                  <button onClick={() => confirmDeleteTask(item.id)}>
+                    <FaTrash size={24} color="#FF3636" />
+                  </button>
+                  <button onClick={() => handleCompleteTask(item.id)}>
+                    <FaCheck size={24} color="#34A853" />
                   </button>
                 </div>
               </div>
@@ -237,6 +291,17 @@ const Dashboard = ({ user }: IHomeProps) => {
           ))}
         </section>
       </main>
+
+      <Modal
+        isOpen={isModalOpen}
+        title="Confirmar remoção"
+        onClose={handleCloseModal}
+        onConfirm={handleDeleteTask}
+      >
+        <p>Tem certeza que deseja remover esta tarefa?</p>
+      </Modal>
+
+      <ToastContainer transition={Slide} />
     </div>
   );
 };
