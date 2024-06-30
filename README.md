@@ -32,13 +32,10 @@ O TaskMaster é um site de gerenciamento de tarefas completo que ajuda você a o
 
 ## Melhorias
 
-* **Adicionar um modal:** Para confiramção de exclusão de uma tarefa e comentário - Esse modal de ser um componente.
-* **Adicionar toastify de notificação:** Para quando uma tarefa for criada, edita ou removida. Assim como também nos comentários.
+
 * **Botão para finalizar uma tarefa:** Finalizar tarefa e com isso bloquear para com que não receba mais comentários.
 * **Criar funcionalidade de editar um comentário:** Permitir que o usuário dono do comentário possa editar-lo.
 * **Adicionar botão (ícone):** Para pode dar like na tarefa, amei, riso ou odiei.
-* **Adicionar o avatar do usuário:** Tanto para usuário logado como também para os que comentarem nas tarefas.
-
 * **Adicionar novos campos:** Títulos, descrições, datas de vencimento e prioridade.
 * **Receber notificações:** Seja notificado quando uma tarefa for concluída ou quando alguém comentar sobre uma tarefa que você está acompanhando.
 * **Organizar tarefas:** Organize suas tarefas por projeto, lista de tarefas ou data de vencimento.
