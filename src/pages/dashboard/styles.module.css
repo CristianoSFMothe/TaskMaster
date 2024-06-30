@@ -54,11 +54,19 @@
   border: 0;
   border-radius: 4px;
   color: var(--text-color-primary);
-  background-color: var(--button-color);
+  background-color: var(--highlight-color);
   padding: 12px 0;
   font-size: 1.125rem;
   cursor: pointer;
   margin-top: 10px;
+  transition: background-color 0.3s ease, color 0.3s ease, opacity 0.3s ease; 
+  opacity: 1;
+}
+
+.buttonCancel:hover {
+  background-color: var(--cancel-button-color); 
+  color: var(--text-color-primary); 
+  opacity: 0.8;
 }
 
 .taskContainer {
@@ -119,12 +127,12 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  user-select: none; /* Para impedir a seleção de texto */
+  user-select: none; 
 }
 
 .taskContent p {
   white-space: pre-wrap;
-  margin-right: 20px; /* Para adicionar espaço antes da barra vertical */
+  margin-right: 20px; 
 }
 
 .taskContent .actions {

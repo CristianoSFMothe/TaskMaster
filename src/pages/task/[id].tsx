@@ -1,3 +1,5 @@
+// [id].tsx
+
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -14,10 +16,11 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
+  updateDoc, // Importe a função de updateDoc
 } from "firebase/firestore";
 
 import Textarea from "../../components/textarea/index";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa"; // Importe FaEdit
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CustomToast } from "../../components/toast/customToast";
@@ -48,6 +51,8 @@ export default function Task({ item, allComments }: ITaskProps) {
   const [comments, setComments] = useState<ICommentsProps[]>(allComments || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [isEditingComment, setIsEditingComment] = useState(false); // Estado para controle de edição
+  const [currentCommentId, setCurrentCommentId] = useState<string | null>(null); // Estado para armazenar o ID do comentário sendo editado
 
   const handleComment = async (event: FormEvent) => {
     event.preventDefault();
@@ -125,6 +130,51 @@ export default function Task({ item, allComments }: ITaskProps) {
     setCommentToDelete(null);
   };
 
+  const handleEditClick = (comment: ICommentsProps) => {
+    setInput(comment.comments); // Define o texto do comentário no input
+    setIsEditingComment(true); // Ativa o modo de edição
+    setCurrentCommentId(comment.id); // Armazena o ID do comentário sendo editado
+  };
+
+  const handleCancelEdit = () => {
+    setInput(""); // Limpa o input
+    setIsEditingComment(false); // Desativa o modo de edição
+    setCurrentCommentId(null); // Limpa o ID do comentário sendo editado
+  };
+
+  const handleUpdateComment = async () => {
+    if (!currentCommentId || input === "") return;
+
+    try {
+      const docRef = doc(db, "comments", currentCommentId);
+      await updateDoc(docRef, {
+        comment: input,
+      });
+
+      // Atualiza o estado dos comentários com o comentário editado
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === currentCommentId ? { ...comment, comments: input } : comment
+        )
+      );
+
+      CustomToast({
+        message: "Comentário atualizado com sucesso!",
+        type: "success",
+      });
+
+      setInput(""); // Limpa o input após a edição
+      setIsEditingComment(false); // Desativa o modo de edição
+      setCurrentCommentId(null); // Limpa o ID do comentário sendo editado
+    } catch (err) {
+      CustomToast({
+        message: "Erro ao atualizar comentário",
+        type: "error",
+      });
+      console.error("Error updating comment: ", err);
+    }
+  };
+
   return (
     <div className={`${styles.container} container`}>
       <Head>
@@ -142,7 +192,7 @@ export default function Task({ item, allComments }: ITaskProps) {
       <section className={`${styles.commentsContainer} commentsContainer`}>
         <h2>Deixar comentário</h2>
 
-        <form onSubmit={handleComment}>
+        <form onSubmit={isEditingComment ? handleUpdateComment : handleComment}>
           <Textarea
             value={input}
             onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
@@ -151,12 +201,27 @@ export default function Task({ item, allComments }: ITaskProps) {
             placeholder="Deixe seu comentário"
           />
 
-          <button
-            className={`${styles.buttonComment} buttonComment`}
-            disabled={!session?.user}
-          >
-            Enviar comentário
-          </button>
+          <div className={`${styles.buttonGroup}`}>
+            <button
+              className={`${styles.buttonComment} ${styles.buttonComment}`}
+              disabled={!session?.user}
+              type="submit"
+            >
+              {isEditingComment ? "Atualizar Comentário" : "Enviar Comentário"}
+            </button>
+          </div>
+
+          {isEditingComment && (
+            <div className={`${styles.buttonGroup}`}>
+              <button
+                type="button"
+                className={`${styles.buttonCancel} ${styles.buttonComment}`}
+                onClick={handleCancelEdit}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
         </form>
       </section>
 
@@ -166,23 +231,32 @@ export default function Task({ item, allComments }: ITaskProps) {
           <span>Nenhum comentário foi encontrado...</span>
         )}
 
-        {comments.map((item) => (
-          <article key={item.id} className={`${styles.comment} comment`}>
+        {comments.map((comment) => (
+          <article key={comment.id} className={`${styles.comment} comment`}>
             <div className={`${styles.headComment}`}>
               <label className={`${styles.commentsLabel} commentsLabel`}>
-                {item.name}
+                {comment.name}
               </label>
 
-              {item.user === session?.user?.email && (
-                <button
-                  className={`${styles.buttonTrash} buttonTrash`}
-                  onClick={() => handleDeleteClick(item.id)}
-                >
-                  <FaTrash size={18} color="#EA3140" />
-                </button>
+              {comment.user === session?.user?.email && (
+                <div className={`${styles.buttonGroup}`}>
+                  <button
+                    className={`${styles.buttonEdit} ${styles.iconButton}`}
+                    onClick={() => handleEditClick(comment)}
+                  >
+                    <FaEdit size={18} color="#3183FF" />
+                  </button>
+
+                  <button
+                    className={`${styles.buttonTrash} ${styles.iconButton}`}
+                    onClick={() => handleDeleteClick(comment.id)}
+                  >
+                    <FaTrash size={18} color="#EA3140" />
+                  </button>
+                </div>
               )}
             </div>
-            <p>{item.comments}</p>
+            <p>{comment.comments}</p>
           </article>
         ))}
       </section>
