@@ -18,9 +18,10 @@ import {
 
 import Textarea from "../../components/textarea/index";
 import { FaTrash } from "react-icons/fa";
-import { ToastContainer, Slide } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { CustomToast } from '../../components/toast/customToast';
+import { ToastContainer, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { CustomToast } from "../../components/toast/customToast";
+import Modal from "../../components/modal";
 
 interface ITaskProps {
   item: {
@@ -45,6 +46,8 @@ export default function Task({ item, allComments }: ITaskProps) {
   const { data: session } = useSession();
   const [input, setInput] = useState("");
   const [comments, setComments] = useState<ICommentsProps[]>(allComments || []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
   const handleComment = async (event: FormEvent) => {
     event.preventDefault();
@@ -76,27 +79,50 @@ export default function Task({ item, allComments }: ITaskProps) {
       setComments((oldItems) => [...oldItems, data]);
 
       setInput("");
-      CustomToast({ message: "Comentário adicionado com sucesso!", type: "success" });
+      CustomToast({
+        message: "Comentário adicionado com sucesso!",
+        type: "success",
+      });
     } catch (err) {
       CustomToast({ message: "Erro ao adicionar comentário", type: "error" });
       console.log(err);
     }
   };
 
-  const handleDeleteComments = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setCommentToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!commentToDelete) return;
+
     try {
-      const docRef = doc(db, "comments", id);
+      const docRef = doc(db, "comments", commentToDelete);
 
       await deleteDoc(docRef);
 
-      const deleteComment = comments.filter((item) => item.id !== id);
+      const deleteComment = comments.filter(
+        (item) => item.id !== commentToDelete
+      );
 
       setComments(deleteComment);
-      CustomToast({ message: "Comentário removido com sucesso!", type: "error" });
+      CustomToast({
+        message: "Comentário removido com sucesso!",
+        type: "error",
+      });
     } catch (err) {
       CustomToast({ message: "Erro ao remover comentário", type: "error" });
       console.log(err);
+    } finally {
+      setIsModalOpen(false);
+      setCommentToDelete(null);
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCommentToDelete(null);
   };
 
   return (
@@ -150,7 +176,7 @@ export default function Task({ item, allComments }: ITaskProps) {
               {item.user === session?.user?.email && (
                 <button
                   className={`${styles.buttonTrash} buttonTrash`}
-                  onClick={() => handleDeleteComments(item.id)}
+                  onClick={() => handleDeleteClick(item.id)}
                 >
                   <FaTrash size={18} color="#EA3140" />
                 </button>
@@ -160,6 +186,14 @@ export default function Task({ item, allComments }: ITaskProps) {
           </article>
         ))}
       </section>
+      <Modal
+        isOpen={isModalOpen}
+        title="Confirmar Exclusão"
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+      >
+        Tem certeza que deseja remover este comentário?
+      </Modal>
       <ToastContainer transition={Slide} />
     </div>
   );

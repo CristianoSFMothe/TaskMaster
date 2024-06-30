@@ -1,5 +1,3 @@
-// Dashboard.tsx ou Dashboard.jsx
-import { toast } from "react-toastify";
 import { GetServerSideProps } from "next";
 import { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import styles from "./styles.module.css";
@@ -22,6 +20,9 @@ import {
 } from "firebase/firestore";
 import Link from "next/link";
 import Modal from "../../components/modal";
+import { CustomToast } from "../../components/toast/customToast";
+import { ToastContainer, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface IHomeProps {
   user: {
@@ -82,7 +83,10 @@ const Dashboard = ({ user }: IHomeProps) => {
     event.preventDefault();
 
     if (input === "") {
-      toast.error("O campo de tarefa está vazio!");
+      CustomToast({
+        message: "O campo de tarefa está vazio!",
+        type: "error",
+      });
       return;
     }
 
@@ -93,7 +97,10 @@ const Dashboard = ({ user }: IHomeProps) => {
           task: input,
           public: publicTask,
         });
-        toast.success("Tarefa atualizada com sucesso!");
+        CustomToast({
+          message: "Tarefa atualizada com sucesso!",
+          type: "success",
+        });
         setIsEditing(false);
         setCurrentTaskId(null);
       } else {
@@ -103,13 +110,19 @@ const Dashboard = ({ user }: IHomeProps) => {
           user: user?.email,
           public: publicTask,
         });
-        toast.success("Tarefa registrada com sucesso!");
+        CustomToast({
+          message: "Tarefa registrada com sucesso!",
+          type: "success",
+        });
       }
 
       setInput("");
       setPublicTask(false);
     } catch (err) {
-      toast.error("Erro ao registrar a tarefa.");
+      CustomToast({
+        message: "Erro ao registrar a tarefa.",
+        type: "error",
+      });
       console.log(err);
     }
   }
@@ -118,14 +131,17 @@ const Dashboard = ({ user }: IHomeProps) => {
     await navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_URL}/task/${id}`
     );
-    toast.info("URL copiada com sucesso!");
+    CustomToast({ message: "URL copiada com sucesso!", type: "info" });
   };
 
   const handleDeleteTask = async () => {
     if (taskToDelete) {
       const docRef = doc(db, "tasks", taskToDelete);
       await deleteDoc(docRef);
-      toast.success("Tarefa removida com sucesso!");
+      CustomToast({
+        message: "Tarefa removida com sucesso!",
+        type: "error",
+      });
       setIsModalOpen(false);
       setTaskToDelete(null);
     }
@@ -148,6 +164,11 @@ const Dashboard = ({ user }: IHomeProps) => {
   const confirmDeleteTask = (id: string) => {
     setTaskToDelete(id);
     setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTaskToDelete(null);
   };
 
   return (
@@ -210,13 +231,6 @@ const Dashboard = ({ user }: IHomeProps) => {
               {item.public && (
                 <div className={`${styles.tagContainer} tagContainer`}>
                   <label className={`${styles.tag} tag`}>PÚBLICO</label>
-
-                  {/* <button
-                    className={`${styles.shareButton} shareButton`}
-                    onClick={() => handleShare(item.id)}
-                  >
-                    <FiShare2 size={22} color="#3183FF" />
-                  </button> */}
                 </div>
               )}
 
@@ -246,11 +260,13 @@ const Dashboard = ({ user }: IHomeProps) => {
       <Modal
         isOpen={isModalOpen}
         title="Confirmar remoção"
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onConfirm={handleDeleteTask}
       >
         <p>Tem certeza que deseja remover esta tarefa?</p>
       </Modal>
+
+      <ToastContainer transition={Slide} />
     </div>
   );
 };
