@@ -1,4 +1,6 @@
+import Image from 'next/image';
 import { useSession, signIn, signOut } from "next-auth/react";
+import { FiUser } from "react-icons/fi";
 import styles from "./styles.module.css";
 import Link from "next/link";
 
@@ -11,7 +13,7 @@ const Header = () => {
         <nav className={`${styles.nav} nav`}>
           <Link href="/">
             <h1 className={`${styles.logo} logo`}>
-            TaskMaster<span>+</span>
+              TaskMaster<span>+</span>
             </h1>
           </Link>
 
@@ -22,15 +24,28 @@ const Header = () => {
           )}
         </nav>
 
-        {status == "loading" ? (
+        {status === "loading" ? (
           <></>
         ) : session ? (
-          <button
-            className={`${styles.loginButton} loginButton`}
-            onClick={() => signOut()}
-          >
-            Olá {session?.user?.name}
-          </button>
+          <div className={styles.userSection}>
+            <button
+              className={`${styles.loginButton} loginButton`}
+              onClick={() => signOut()}
+            >
+              Olá {session?.user?.name}
+              {session?.user?.image ? (
+                <Image
+                  src={session?.user?.image}
+                  alt="User Avatar"
+                  className={styles.avatar}
+                  width={40}
+                  height={40}
+                />
+              ) : (
+                <FiUser size={40} className={styles.defaultAvatar} />
+              )}
+            </button>
+          </div>
         ) : (
           <button
             className={`${styles.loginButton} loginButton`}

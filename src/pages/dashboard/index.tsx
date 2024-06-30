@@ -78,7 +78,7 @@ const Dashboard = ({ user }: IHomeProps) => {
     setPublicTask(event.target.checked);
   };
 
-  async function handlerRegisterTask(event: FormEvent) {
+  async function handleRegisterTask(event: FormEvent) {
     event.preventDefault();
 
     if (input === "") {
@@ -114,14 +114,14 @@ const Dashboard = ({ user }: IHomeProps) => {
     }
   }
 
-  const handlerShare = async (id: string) => {
+  const handleShare = async (id: string) => {
     await navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_URL}/task/${id}`
     );
     toast.info("URL copiada com sucesso!");
   };
 
-  const handlerDeleteTask = async () => {
+  const handleDeleteTask = async () => {
     if (taskToDelete) {
       const docRef = doc(db, "tasks", taskToDelete);
       await deleteDoc(docRef);
@@ -163,7 +163,7 @@ const Dashboard = ({ user }: IHomeProps) => {
 
             <form
               className={`${styles.form} form`}
-              onSubmit={handlerRegisterTask}
+              onSubmit={handleRegisterTask}
             >
               <Textarea
                 placeholder="Digite qual a sua tarefa..."
@@ -211,12 +211,12 @@ const Dashboard = ({ user }: IHomeProps) => {
                 <div className={`${styles.tagContainer} tagContainer`}>
                   <label className={`${styles.tag} tag`}>PÚBLICO</label>
 
-                  <button
+                  {/* <button
                     className={`${styles.shareButton} shareButton`}
-                    onClick={() => handlerShare(item.id)}
+                    onClick={() => handleShare(item.id)}
                   >
-                    <FiShare2 size={12} color="#3183FF" />
-                  </button>
+                    <FiShare2 size={22} color="#3183FF" />
+                  </button> */}
                 </div>
               )}
 
@@ -247,7 +247,7 @@ const Dashboard = ({ user }: IHomeProps) => {
         isOpen={isModalOpen}
         title="Confirmar remoção"
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handlerDeleteTask}
+        onConfirm={handleDeleteTask}
       >
         <p>Tem certeza que deseja remover esta tarefa?</p>
       </Modal>
