@@ -89,15 +89,71 @@ const Dashboard = ({ user }: IHomeProps) => {
 
   async function handleRegisterTask(event: FormEvent) {
     event.preventDefault();
-
-    if (input === "" || !startDate || !endDate) {
+  
+    // Seleciona os elementos do formulário
+    const taskInputElement = document.querySelector("textarea");
+    const startDateInputElement = document.querySelector(".start-date");
+    const endDateInputElement = document.querySelector(".end-date");
+  
+    // Remove estilos de erro antigos (caso ainda queira usar)
+    if (taskInputElement) taskInputElement.classList.remove("error");
+    if (startDateInputElement) startDateInputElement.classList.remove("error");
+    if (endDateInputElement) endDateInputElement.classList.remove("error");
+  
+    let hasError = false;
+  
+    // Verifica se nenhum campo foi preenchido
+    if (input === "" && !startDate && !endDate) {
       CustomToast({
-        message: "Todos os campos devem ser preenchidos!",
+        message: "Preencha os campos obrigatórios.",
         type: "error",
       });
+      if (taskInputElement) taskInputElement.classList.add("error");
+      if (startDateInputElement) startDateInputElement.classList.add("error");
+      if (endDateInputElement) endDateInputElement.classList.add("error");
+      hasError = true;
+    } else if (input !== "" && !startDate && !endDate) {
+      CustomToast({
+        message: "Informe a data de início e término.",
+        type: "error",
+      });
+      if (startDateInputElement) startDateInputElement.classList.add("error");
+      if (endDateInputElement) endDateInputElement.classList.add("error");
+      hasError = true;
+    } else if (input !== "" && startDate && !endDate) {
+      CustomToast({
+        message: "Informe a data de término.",
+        type: "error",
+      });
+      if (endDateInputElement) endDateInputElement.classList.add("error");
+      hasError = true;
+    } else if (input !== "" && !startDate && endDate) {
+      CustomToast({
+        message: "Informe a data de início.",
+        type: "error",
+      });
+      if (startDateInputElement) startDateInputElement.classList.add("error");
+      hasError = true;
+    } else if (input === "" && (startDate || endDate)) {
+      CustomToast({
+        message: "Informe uma tarefa.",
+        type: "error",
+      });
+      if (taskInputElement) taskInputElement.classList.add("error");
+      hasError = true;
+    } else if (new Date(startDate) > new Date(endDate)) {
+      CustomToast({
+        message: "A data de término não pode ser anterior à data de início.",
+        type: "error",
+      });
+      if (endDateInputElement) endDateInputElement.classList.add("error");
+      hasError = true;
+    }
+  
+    if (hasError) {
       return;
     }
-
+  
     try {
       if (isEditing && currentTaskId) {
         const docRef = doc(db, "tasks", currentTaskId);
@@ -127,7 +183,7 @@ const Dashboard = ({ user }: IHomeProps) => {
           type: "success",
         });
       }
-
+  
       setInput("");
       setPublicTask(false);
       setStartDate("");
@@ -140,6 +196,9 @@ const Dashboard = ({ user }: IHomeProps) => {
       console.log(err);
     }
   }
+  
+  
+  
 
   const handleShare = async (id: string) => {
     await navigator.clipboard.writeText(
