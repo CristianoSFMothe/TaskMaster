@@ -24,6 +24,7 @@ export const CustomToast: React.FC<CustomToastProps> = ({ message, type }) => {
     progressStyle: {
       background: type === 'error' ? '#EA3140' : undefined,
     },
+    closeButton: false
   };
 
   switch (type) {

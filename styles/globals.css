@@ -21,3 +21,11 @@
 html {
   font-family: "Robot", sans-serif;
 }
+
+.Toastify__toast-container {
+  user-select: none;
+}
+
+.Toastify__toast {
+  pointer-events: none; 
+}

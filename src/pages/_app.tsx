@@ -3,14 +3,18 @@ import type { AppProps } from "next/app";
 import Header from "../components/header";
 import { SessionProvider } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <SessionProvider session={pageProps.session}>
       <Header />
       <Component {...pageProps} />
-      <ToastContainer />
+      <ToastContainer 
+        transition={Slide}
+        closeOnClick={false} 
+        style={{ userSelect: "none" }}
+      />
     </SessionProvider>
   );
 };

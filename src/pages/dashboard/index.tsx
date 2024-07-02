@@ -47,6 +47,8 @@ const Dashboard = ({ user }: IHomeProps) => {
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -84,9 +86,9 @@ const Dashboard = ({ user }: IHomeProps) => {
   async function handleRegisterTask(event: FormEvent) {
     event.preventDefault();
 
-    if (input === "") {
+    if (input === "" || !startDate || !endDate) {
       CustomToast({
-        message: "O campo de tarefa está vazio!",
+        message: "Todos os campos devem ser preenchidos!",
         type: "error",
       });
       return;
@@ -98,6 +100,8 @@ const Dashboard = ({ user }: IHomeProps) => {
         await updateDoc(docRef, {
           task: input,
           public: publicTask,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
         });
         CustomToast({
           message: "Tarefa atualizada com sucesso!",
@@ -111,6 +115,8 @@ const Dashboard = ({ user }: IHomeProps) => {
           created: new Date(),
           user: user?.email,
           public: publicTask,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
         });
         CustomToast({
           message: "Tarefa registrada com sucesso!",
@@ -120,6 +126,8 @@ const Dashboard = ({ user }: IHomeProps) => {
 
       setInput("");
       setPublicTask(false);
+      setStartDate("");
+      setEndDate("");
     } catch (err) {
       CustomToast({
         message: "Erro ao registrar a tarefa.",
@@ -222,6 +230,31 @@ const Dashboard = ({ user }: IHomeProps) => {
                 }
               />
 
+              <div className={`${styles.dateContainer} dateContainer`}>
+                <label>
+                  Data de Início:
+                  <input
+                    type="date"
+                    value={startDate}
+                    className="start-date"
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      setStartDate(event.target.value)
+                    }
+                  />
+                </label>
+                <label>
+                  Data Prevista de Término:
+                  <input
+                    type="date"
+                    value={endDate}
+                    className="end-date"
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      setEndDate(event.target.value)
+                    }
+                  />
+                </label>
+              </div>
+
               <div className={`${styles.checkboxArea} checkboxArea`}>
                 <input
                   type="checkbox"
@@ -259,6 +292,10 @@ const Dashboard = ({ user }: IHomeProps) => {
               {item.public && (
                 <div className={`${styles.tagContainer} tagContainer`}>
                   <label className={`${styles.tag} tag`}>PÚBLICO</label>
+
+                  <button className={`${styles.shareButton} shareButton`}>
+                    <FiShare2 size={12} color="#3183FF" />
+                  </button>
                 </div>
               )}
 
