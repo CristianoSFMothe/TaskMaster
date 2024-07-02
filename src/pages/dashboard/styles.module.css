@@ -98,6 +98,34 @@
   border: 1.5px solid #909090;
   border-radius: 4px;
   padding: 14px;
+  position: relative;
+  gap: 8px;
+}
+
+.divider {
+  border-bottom: 1px solid #ddd;
+  width: calc(100% - 32px); 
+  margin: 16px auto;
+}
+
+.dateInfo {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1024px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 16px; 
+}
+
+.dateInfo p {
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .dateInfo {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .tagContainer {
@@ -227,3 +255,7 @@
   }
 }
 
+.disabledButton {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

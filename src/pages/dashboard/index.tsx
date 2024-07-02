@@ -37,6 +37,8 @@ interface ITasksProps {
   task: string;
   user: string;
   completed: boolean;
+  startDate: Date;
+  endDate: Date;
 }
 
 const Dashboard = ({ user }: IHomeProps) => {
@@ -70,6 +72,8 @@ const Dashboard = ({ user }: IHomeProps) => {
             public: doc.data().public,
             user: doc.data().user,
             completed: doc.data().completed || false,
+            startDate: doc.data().startDate?.toDate(),
+            endDate: doc.data().endDate?.toDate(),
           });
         });
 
@@ -157,14 +161,31 @@ const Dashboard = ({ user }: IHomeProps) => {
     }
   };
 
-  const handlerEditTask = (task: ITasksProps) => {
+  const handleEditTask = (task: ITasksProps) => {
     setInput(task.task);
     setPublicTask(task.public);
+
+    const startDate =
+      task.startDate instanceof Date
+        ? task.startDate
+        : new Date(task.startDate);
+    const endDate =
+      task.endDate instanceof Date ? task.endDate : new Date(task.endDate);
+
+    setStartDate(
+      !isNaN(startDate.getTime())
+        ? startDate.toISOString().substring(0, 10)
+        : ""
+    );
+    setEndDate(
+      !isNaN(endDate.getTime()) ? endDate.toISOString().substring(0, 10) : ""
+    );
+
     setIsEditing(true);
     setCurrentTaskId(task.id);
   };
 
-  const handlerCancelEdit = () => {
+  const handleCancelEdit = () => {
     setInput("");
     setPublicTask(false);
     setIsEditing(false);
@@ -275,7 +296,7 @@ const Dashboard = ({ user }: IHomeProps) => {
                 <button
                   type="button"
                   className={`${styles.buttonCancel} buttonCancel`}
-                  onClick={handlerCancelEdit}
+                  onClick={handleCancelEdit}
                 >
                   Cancelar
                 </button>
@@ -293,7 +314,10 @@ const Dashboard = ({ user }: IHomeProps) => {
                 <div className={`${styles.tagContainer} tagContainer`}>
                   <label className={`${styles.tag} tag`}>PÚBLICO</label>
 
-                  <button className={`${styles.shareButton} shareButton`}>
+                  <button
+                    className={`${styles.shareButton} shareButton`}
+                    onClick={() => handleShare(item.id)}
+                  >
                     <FiShare2 size={12} color="#3183FF" />
                   </button>
                 </div>
@@ -313,16 +337,58 @@ const Dashboard = ({ user }: IHomeProps) => {
                 )}
 
                 <div className={styles.actions}>
-                  <button onClick={() => handlerEditTask(item)}>
-                    <FaEdit size={24} color="#3183FF" />
+                  <button
+                    onClick={() => !item.completed && handleEditTask(item)}
+                    disabled={item.completed}
+                    className={item.completed ? styles.disabledButton : ""}
+                  >
+                    <FaEdit
+                      size={24}
+                      color={item.completed ? "#B0B0B0" : "#3183FF"}
+                    />
                   </button>
-                  <button onClick={() => confirmDeleteTask(item.id)}>
-                    <FaTrash size={24} color="#FF3636" />
+                  <button
+                    onClick={() =>
+                      !item.completed && confirmDeleteTask(item.id)
+                    }
+                    disabled={item.completed}
+                    className={item.completed ? styles.disabledButton : ""}
+                  >
+                    <FaTrash
+                      size={24}
+                      color={item.completed ? "#B0B0B0" : "#FF3636"}
+                    />
                   </button>
-                  <button onClick={() => handleCompleteTask(item.id)}>
-                    <FaCheck size={24} color="#34A853" />
+                  <button
+                    onClick={() =>
+                      !item.completed && handleCompleteTask(item.id)
+                    }
+                    disabled={item.completed}
+                    className={item.completed ? styles.disabledButton : ""}
+                  >
+                    <FaCheck
+                      size={24}
+                      color={item.completed ? "#B0B0B0" : "#34A853"}
+                    />
                   </button>
                 </div>
+              </div>
+
+              <div className={styles.divider}></div>
+
+              <div className={`${styles.dateInfo} dateInfo`}>
+                <p className="startDate">
+                  <strong>Data de Início:</strong>{" "}
+                  {item.startDate
+                    ? new Date(item.startDate).toLocaleDateString()
+                    : "N/A"}
+                </p>
+                <p className="endDate">
+                  <strong>Data Prevista de Término:</strong>{" "}
+                  {item.endDate
+                    ? new Date(item.endDate).toLocaleDateString()
+                    : "N/A"}
+                </p>
               </div>
             </article>
           ))}
